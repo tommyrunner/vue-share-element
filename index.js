@@ -1,8 +1,8 @@
 let shareElement = {
   /**
    * 入口
-   * @param {*} Vue Vue对象
-   * @param {*} options
+   * @param {Object} Vue Vue对象
+   * @param {Object} options
    *  duration：动画过渡时间
    *  zIndex：共享元素层级
    */
@@ -21,24 +21,26 @@ let shareElement = {
         shareEl.style.width = `${shareEl.offsetWidth}px`;
         shareEl.style.height = `${shareEl.offsetHeight}px`;
         shareEl.style.transition = `${_options.duration / 1000}s`;
-        el.style.transition = `${_options.duration / 1000}s`;
-        el.style.opacity = "0";
         document.body.appendChild(shareEl);
       };
-      // 过渡
+      // 过渡1-隐藏当前元素
+      yield () => {
+        el.style.opacity = "0";
+      };
+      // 过渡2-异步移动共享元素
       yield new Promise((res) => {
         setTimeout(() => {
           shareEl.style.width = `${el.offsetWidth}px`;
           shareEl.style.height = `${el.offsetHeight}px`;
           shareEl.style.top = `${el.offsetTop}px`;
           shareEl.style.left = `${el.offsetLeft}px`;
-          el.style.opacity = "1";
           res();
         }, 1);
       });
-      // 清空
+      // 过渡3-最后显示当前元素，并清空共享元素
       yield new Promise((res) => {
         setTimeout(() => {
+          el.style.opacity = "1";
           shareKey = el.getAttribute("share-key");
           window.shareElementObj[shareKey] = null;
           document.body.removeChild(shareEl);
@@ -81,12 +83,14 @@ let shareElement = {
           let _$updateShareView = _updateShareView(shareEl, el);
           // 1.初始化
           _$updateShareView.next().value();
+          _$updateShareView.next().value();
           await _$updateShareView.next().value;
           await _$updateShareView.next().value;
         },
         _saveShareNowElement(el) {
           if (!el) return;
           let shareKey = el.getAttribute("share-key");
+          // 处理保存样式
           window.shareElementObj = { [shareKey]: el };
         },
         _getShareNowElement(el) {
