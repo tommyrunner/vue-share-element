@@ -1,12 +1,17 @@
 <template>
-  <transition name="start">
+  <transition :name="startType">
     <slot />
   </transition>
 </template>
 <script>
 export default {
   name: "ShareElement",
-
+  props: {
+    startType: {
+      type: String,
+      default: "start-def",
+    },
+  },
   data() {
     return {};
   },
@@ -18,16 +23,26 @@ export default {
 </script>
 <style lang="scss">
 // 默认router-view动画(默认淡出)
-.start-enter-active,
-.start-leave-active {
+.start-def-enter-active,
+.start-def-leave-active,
+.start-top-enter-active,
+.start-top-leave-active {
   will-change: transform;
   transition: all 600ms;
   position: absolute;
 }
-.start-enter {
+.start-def-enter {
   opacity: 0;
 }
-.start-leave-active {
+.start-def-leave-active {
   opacity: 0;
+}
+.start-top-enter {
+  opacity: 0;
+  transform: translateY(50%);
+}
+.start-top-leave-active {
+  opacity: 0;
+  transform: translateY(50%);
 }
 </style>

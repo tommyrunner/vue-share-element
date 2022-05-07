@@ -8,6 +8,8 @@ let shareElement = {
    */
   install: function (Vue, options) {
     let _options = Object.assign({ duration: 600, zIndex: 20001 }, options);
+    let el = null,
+      shareEl = null;
     function* _updateShareView(shareEl, el) {
       if (!shareEl || !el) return;
       // 初始化
@@ -37,6 +39,8 @@ let shareElement = {
       // 清空
       yield new Promise((res) => {
         setTimeout(() => {
+          shareKey = el.getAttribute("share-key");
+          window.shareElementObj[shareKey] = null;
           document.body.removeChild(shareEl);
           res();
         }, _options.duration);
@@ -53,9 +57,10 @@ let shareElement = {
       components: {
         shareElement: () => import("./share-element.vue"),
       },
-      // destroyed 保存共享组件
-      destroyed() {
-        this._saveShareNowElement(document.getElementById("share"));
+      // beforeDestroy 保存共享组件
+      beforeDestroy() {
+        let shareEl = this.$refs.share;
+        shareEl && shareEl.getAttribute("share-key") && this._saveShareNowElement(shareEl);
       },
       mounted() {
         this._$shareElementCall();
@@ -63,9 +68,9 @@ let shareElement = {
       methods: {
         async _$shareElementCall() {
           // 当前界面元素
-          let el = this.$refs.share;
+          el = this.$refs.share;
           // 共享元素
-          let shareEl = this._getShareNowElement(el);
+          shareEl = this._getShareNowElement(el);
           if (!shareEl || !el) return;
           // 参数校验
           let isMessage = isOptions(_options);
