@@ -1,6 +1,13 @@
 # vue-share-element
 
+## 简介
+
+> + vue-share-element基于vue的单界面路由**动画跳转**插件。
+>
+> + 使用 **共享元素的方式** 给路由跳转增加动画。
+
 ## 安装
+
 ```shell
 npm install vue-share-element
 ```
@@ -37,17 +44,20 @@ Vue.use(shareElement);
 + 页面1  元素设置 
 
   ```vue
-  <tag  share-key="home" ref="share"/>
+  <tag  share-key="share-tag" ref="share"/>
   // $router.push('/page2')
   ```
 
 + 页面2  元素设置 
 
   ```vue
-  <tag  share-key="home" ref="share"/>
+  <tag  share-key="share-tag" ref="share"/>
   // $router.push('/page1')||$router.go(-1)
   ```
 
+> + share-key：**共享元素key**与**跳转元素key**一致，并只会使用一个（必须）
+> + ref：必须为share，便 share-element 查找（必须）
+
 ## 附
 
-+ tag元素建议设置 宽高，例如img。
++ tag 元素建议设置 宽高，例如img。

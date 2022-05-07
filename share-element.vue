@@ -1,5 +1,5 @@
 <template>
-  <transition :name="startType">
+  <transition :name="startTypes.includes(startType) ? startType : startTypes[0]">
     <slot />
   </transition>
 </template>
@@ -13,7 +13,9 @@ export default {
     },
   },
   data() {
-    return {};
+    return {
+      startTypes: ["start-def", "start-top"],
+    };
   },
 
   mounted() {},
