@@ -9,7 +9,8 @@ let shareElement = {
   install: function (Vue, options) {
     let _options = Object.assign({ duration: 600, zIndex: 20001 }, options);
     let el = null,
-      shareEl = null;
+      shareEl = null,
+      mulClick = null;
     function* _updateShareView(shareEl, el) {
       if (!shareEl || !el) return;
       // 初始化
@@ -42,7 +43,7 @@ let shareElement = {
         setTimeout(() => {
           el.style.opacity = "1";
           shareKey = el.getAttribute("share-key");
-          window.shareElementObj[shareKey] = null;
+          Vue.$shareElementObj[shareKey] = null;
           document.body.removeChild(shareEl);
           res();
         }, _options.duration);
@@ -61,10 +62,16 @@ let shareElement = {
       },
       // beforeDestroy 保存共享组件
       beforeDestroy() {
-        let shareEl = this.$refs.share;
-        shareEl && shareEl.getAttribute("share-key") && this._saveShareNowElement(shareEl);
+        // 防止多次调用
+        if (!mulClick) {
+          let shareEl = this.$refs.share;
+          if (!shareEl) Vue.$shareElementObj = null;
+          else shareEl.getAttribute("share-key") && this._saveShareNowElement(shareEl);
+          mulClick = new Date().getTime();
+        }
       },
       mounted() {
+        mulClick = null;
         this._$shareElementCall();
       },
       methods: {
@@ -91,12 +98,12 @@ let shareElement = {
           if (!el) return;
           let shareKey = el.getAttribute("share-key");
           // 处理保存样式
-          window.shareElementObj = { [shareKey]: el };
+          Vue.$shareElementObj = { [shareKey]: el };
         },
         _getShareNowElement(el) {
           if (!el) return;
           let shareKey = el.getAttribute("share-key");
-          let shareEl = window.shareElementObj && window.shareElementObj[shareKey];
+          let shareEl = Vue.$shareElementObj && Vue.$shareElementObj[shareKey];
           return shareEl;
         },
       },
