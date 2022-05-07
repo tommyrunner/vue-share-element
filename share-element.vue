@@ -36,15 +36,23 @@ export default {
 .start-def-enter {
   opacity: 0;
 }
-.start-def-leave-active {
+.start-def-leave {
   opacity: 0;
 }
 .start-top-enter {
   opacity: 0;
   transform: translateY(50%);
 }
-.start-top-leave-active {
+.start-top-enter-to {
+  opacity: 1;
+  transform: translateY(0%);
+}
+.start-top-leave {
   opacity: 0;
+  transform: translateY(0%);
+}
+.start-top-leave-to {
+  opacity: 1;
   transform: translateY(50%);
 }
 </style>
