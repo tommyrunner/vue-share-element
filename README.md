@@ -79,8 +79,10 @@ Vue.use(shareElement);
           methods: {
               // 事件代理 将点击的element 动态设置share
               toPage(e) {
-                  this.$refs["share"] = e.target;
-                  // $router.push('/page2')
+                  if (el.nodeName.toUpperCase() === "TAG") {
+                      this.$refs["share"] = e.target;
+                      // $router.push('/page2')
+                  }
               },
           },
       };
@@ -102,3 +104,4 @@ Vue.use(shareElement);
 
 + tag 元素建议设置 宽高，例如img。
 + 如果父容器加了Padding有动画闪动，父容器需加上 box-sizing: border-box;
++ 共享元素的tag标签不能是vue的根元素，需要包裹。
