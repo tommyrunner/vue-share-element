@@ -9,9 +9,10 @@ let shareElement = {
   install: function (Vue, options) {
     // 配置参数
     let _options = Object.assign({ duration: 600, zIndex: 20001 }, options);
-    // el：当前元素,shareEl：共享元素,mulClick：防抖
+    // el：当前元素,_shareType:share类型，shareEl：共享元素,mulClick：防抖
     let el = null,
       shareEl = null,
+      _shareType = "share",
       mulClick = null;
     /**
      * 共享元素动画生成器
@@ -21,12 +22,15 @@ let shareElement = {
      */
     function* _updateShareView(shareEl, el) {
       if (!shareEl || !el) return;
+      // share共享元素使用窗口定位
+      let shareElRect = shareEl.getBoundingClientRect();
+      // let elRect = el.getBoundingClientRect();
       // 初始化shareEl
       yield () => {
         shareEl.style.position = "fixed";
         shareEl.style.zIndex = _options.zIndex;
-        shareEl.style.top = `${shareEl.offsetTop}px`;
-        shareEl.style.left = `${shareEl.offsetLeft}px`;
+        shareEl.style.top = `${shareElRect.top}px`;
+        shareEl.style.left = `${shareElRect.left}px`;
         shareEl.style.width = `${shareEl.offsetWidth}px`;
         shareEl.style.height = `${shareEl.offsetHeight}px`;
         shareEl.style.transition = `${_options.duration / 1000}s`;
@@ -44,8 +48,8 @@ let shareElement = {
         setTimeout(() => {
           shareEl.style.width = `${el.offsetWidth}px`;
           shareEl.style.height = `${el.offsetHeight}px`;
-          shareEl.style.top = `${el.offsetTop}px`;
-          shareEl.style.left = `${el.offsetLeft}px`;
+          shareEl.style.top = `${el.offsetTop - ((_shareType === "shares" && Vue.$sharesScrollTop) || 0)}px`;
+          shareEl.style.left = `${el.offsetLeft - ((_shareType === "shares" && Vue.$sharesScrollLeft) || 0)}px`;
           res();
         }, 1);
       });
@@ -91,8 +95,14 @@ let shareElement = {
           // 兼容多对一
           if (this.$refs["shares"]) {
             this._$returnSharesPoinit();
+            _shareType = "shares";
+            this.$refs["shares"].addEventListener("scroll", function () {
+              Vue.$sharesScrollTop = this.scrollTop;
+              Vue.$sharesScrollLeft = this.scrollLeft;
+            });
             return;
           } else {
+            _shareType = "share";
             // 当前界面元素
             el = this.$refs.share instanceof Array ? this.$refs.share[0] : this.$refs.share;
             // 共享元素
@@ -132,6 +142,9 @@ let shareElement = {
           // 如果有父容器，并是多对一模式,重新定位
           if (this.$refs["shares"] && Vue.$shareElRefIndex && Vue.$shareElRefIndex !== -1) {
             this.$refs["share"] = this.$refs["shares"].children[Vue.$shareElRefIndex];
+            // 滚动定位
+            this.$refs["shares"].scrollTop = Vue.$sharesScrollTop;
+            this.$refs["shares"].scrollLeft = Vue.$sharesScrollLeft;
             // 当前界面元素
             el = this.$refs.share instanceof Array ? this.$refs.share[0] : this.$refs.share;
             // 共享元素
