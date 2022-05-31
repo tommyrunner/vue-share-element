@@ -1,6 +1,6 @@
 {
   "name": "vue-share-element",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "vue2共享元素跳转",
   "main": "index.js",
   "scripts": {

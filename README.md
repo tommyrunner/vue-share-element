@@ -2,6 +2,8 @@
 
 ## 简介
 
+![csdn](https://img-blog.csdnimg.cn/4f3944b991ea457aa95e487a7d90230a.gif#pic_center)
+
 > + vue-share-element基于vue的单界面路由**动画跳转**插件。
 >
 > + 使用 **共享元素的方式** 给路由跳转增加动画。
