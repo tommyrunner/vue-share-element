@@ -19,11 +19,28 @@ npm install vue-share-element
 ```js
 import shareElement from "vue-share-element";
 Vue.use(shareElement);
-// 自定义参数 Vue.use(shareElement,{ duration: 600, zIndex: 20001 });
+/*
+自定义参数 
+Vue.use(shareElement,
+	{ 
+	duration: 600, 
+	zIndex: 20001,
+	shareRefName: "share",
+	sharesRefName:'shares' 
+	}
+);
+*/ 
 ```
 
 > + duration：过渡动画时间，默认600
 > + zIndex：共享元素层级，默认20001
+> + shareRefName：自定义共享元素ref名，默认share
+> + sharesRefName：自定义共享元素集合ref名，默认shares
+>
+> 注：为什么使用ref去获取元素
+>
+> + 如果开发者设置了多个同一ref值不会影响共享元素的获取与控制
+> + ref 获取的状态与时间暂时是比较吻合当前需求
 
 ## 使用
 
@@ -101,6 +118,29 @@ Vue.use(shareElement);
 > + :ref-index="index"  ：该属性用于 vue-share-element 找到触发定位（必须并固定是下标index）
 > + share-key：**共享元素key**与**当前元素key**一致（必须）
 > + 注意跳转界面前主动将 this.$refs["share"] **动态设置**触发的元素
+
+## hooks生命周期
+
+> 所有的hook都封装在 **$shareHooks** 对象中
+
+```js
+mounted() {
+    this.$shareHooks.beforeStart = () => {
+        console.log("动画开始前");
+    };
+    this.$shareHooks.start = () => {
+        console.log("动画开始后");
+    };
+    this.$shareHooks.beforeEnd = () => {
+        console.log("动画结束前");
+    };
+    this.$shareHooks.end = () => {
+        console.log("动画结束后");
+    };
+},
+```
+
+
 
 ## 附
 
