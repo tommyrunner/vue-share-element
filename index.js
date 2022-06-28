@@ -66,7 +66,7 @@ let shareElement = {
       yield new Promise((res) => {
         setTimeout(() => {
           el.style.opacity = "1";
-          shareKey = el.getAttribute("share-key");
+          let shareKey = el.getAttribute("share-key");
           Vue.$shareElementObj[shareKey] = null;
           document.body.removeChild(shareEl);
           res();
@@ -196,4 +196,4 @@ let shareElement = {
     }
   },
 };
-module.exports = shareElement;
+export default shareElement;
