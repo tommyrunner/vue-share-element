@@ -1,7 +1,7 @@
 {
   "name": "vue-share-element",
-  "version": "1.4.2",
-  "description": "vue2共享元素跳转",
+  "version": "2.0.0",
+  "description": "vue共享元素跳转",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,4 +1,4 @@
-# vue-share-element
+# vue-share-element（已兼容Vue3.0）
 
 ## 简介
 
@@ -140,10 +140,75 @@ mounted() {
 },
 ```
 
+## 兼容Vue3.0
 
+### 引用(无更改)
+
+### 使用
+
+```vue
+<router-view v-slot="{ Component }">
+    <ShareElement name="start-def">
+        <component :is="Component" :key="$route.fullPath" />
+    </ShareElement>
+</router-view>
+import { defineAsyncComponent } from "vue";
+export default {
+  name: "App",
+  components: {
+    ShareElement: defineAsyncComponent(() => import("./components/share-element.vue")),
+  },
+};
+</script>
+```
+
+> + vue3.0中router-view 只能内嵌transition方式
+> + 如果项目使用vite创建，使用defineAsyncComponent 异步引入组件
+
+### 设置共享元素（一对一）(无更改)
+
+### 设置共享元素（多对一）
+
++ 页面1  元素设置 
+
+  ```vue
+  <template>
+    <div @click="toPage" ref="shares">
+      <tag v-for="(item, index) in shareList" :key="index" :ref-index="index" share-key="share-tag"/>
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    data() {
+      return {
+        shareList: [],
+      };
+    },
+    methods: {
+      toPage(e) {
+        let el = e.target;
+        if (el.nodeName.toUpperCase() === "TAG") {
+          this.$.refs["share"] = el;
+    		// $router.push('/page2')
+        }
+      },
+    },
+  };
+  </script>
+  
+  ```
+
+  > + 使用方法与思路**无更改**
+  > + vue3.0中 this.$refs通过**Proxy**代理不能直接存入dom对象，但vue3.0在**this.$**中留了**refs**对象使用依旧。
+
+### hooks生命周期(无更改)
 
 ## 附
 
-+ tag 元素建议设置 宽高，例如img。
++ tag 元素建议设置 **宽高**，例如img。
++ **父容器**必须有**高度**，返回界面需要定位。
 + 如果父容器加了Padding有动画闪动，父容器需加上 box-sizing: border-box;
 + 共享元素的tag标签不能是vue的根元素，需要包裹。
++ 遗留问题：
+  + 如果当前元素处于滚动最低位置，未定位(<u>待解决中</u>)

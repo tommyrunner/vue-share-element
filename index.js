@@ -12,6 +12,7 @@ let shareElement = {
     // el：当前元素,_shareType:share类型，_hooks:钩子，_$HooksName钩子抛变量，shareEl：共享元素,mulClick：防抖
     let el = null,
       shareEl = null,
+      shareElConfig = null,
       _shareType,
       _hooks = {},
       _$HooksName = "$shareHooks",
@@ -25,8 +26,12 @@ let shareElement = {
     function* _updateShareView(shareEl, el) {
       if (!shareEl || !el) return;
       callHooks("beforeStart");
-      // share共享元素使用窗口定位
-      let shareElRect = shareEl.getBoundingClientRect();
+      /**
+       * share共享元素使用窗口定位
+       * shareElConfig 兼容vue3.0
+       *  vue3.0中获取getBoundingClientRect有延迟，需要再添加时保存getBoundingClientRect值
+       */
+      let shareElRect = shareElConfig || shareEl.getBoundingClientRect();
       // let elRect = el.getBoundingClientRect();
       // 初始化shareEl
       yield () => {
@@ -36,14 +41,16 @@ let shareElement = {
           zIndex: _options.zIndex,
           top: `${shareElRect.top}px`,
           left: `${shareElRect.left}px`,
-          width: `${shareEl.offsetWidth}px`,
-          height: `${shareEl.offsetHeight}px`,
+          width: `${(shareElConfig && shareElConfig.offsetWidth) || shareEl.offsetWidth}px`,
+          height: `${(shareElConfig && shareElConfig.offsetHeight) || shareEl.offsetHeight}px`,
           transition: `${_options.duration / 1000}s`,
           overflow: "hidden",
           margin: 0,
           padding: 0,
         });
         document.body.appendChild(shareEl);
+        // 当前元素不能有过渡效果
+        el.style.transition = "none";
       };
       // 过渡1-隐藏当前元素
       yield () => {
@@ -67,8 +74,11 @@ let shareElement = {
         setTimeout(() => {
           el.style.opacity = "1";
           let shareKey = el.getAttribute("share-key");
-          Vue.$shareElementObj[shareKey] = null;
-          document.body.removeChild(shareEl);
+          // 清空配置
+          Vue.$shareElementObj && (Vue.$shareElementObj[shareKey] = null);
+          Vue.$shareElementConfig && (Vue.$shareElementConfig[shareKey] = null);
+          shareElConfig = null;
+          if (shareEl.parentNode && shareEl.parentNode === document.body) document.body.removeChild(shareEl);
           res();
         }, _options.duration);
       });
@@ -80,13 +90,11 @@ let shareElement = {
       },
       // beforeDestroy 保存共享组件
       beforeDestroy() {
-        // 防止多次调用
-        if (!mulClick) {
-          let shareEl = this.$refs[_options.shareRefName] instanceof Array ? this.$refs[_options.shareRefName][0] : this.$refs[_options.shareRefName];
-          if (!shareEl) Vue.$shareElementObj = null;
-          else shareEl.getAttribute("share-key") && _$saveShareNowElement(shareEl);
-          mulClick = new Date().getTime();
-        }
+        _$beforeDestroy(this);
+      },
+      // 兼容vue3重命名beforeDestroy
+      beforeUnmount() {
+        _$beforeDestroy(this);
       },
       beforeCreate() {
         // hook 事件接收
@@ -103,18 +111,15 @@ let shareElement = {
         // 动画 call
         _$shareElementCall() {
           // 兼容多对一
-          if (this.$refs[_options.sharesRefName]) {
+          let $refs = _$getRefs(this);
+          if ($refs[_options.sharesRefName]) {
             _$returnSharesPoinit(this);
             _shareType = _options.sharesRefName;
-            this.$refs[_options.sharesRefName].addEventListener("scroll", function () {
-              Vue.$sharesScrollTop = this.scrollTop;
-              Vue.$sharesScrollLeft = this.scrollLeft;
-            });
-            return;
+            $refs[_options.sharesRefName].addEventListener("scroll", _$saveSharesScroll);
           } else {
             _shareType = _options.shareRefName;
             // 当前界面元素
-            el = this.$refs[_options.shareRefName] instanceof Array ? this.$refs[_options.shareRefName][0] : this.$refs[_options.shareRefName];
+            el = $refs[_options.shareRefName] instanceof Array ? $refs[_options.shareRefName][0] : $refs[_options.shareRefName];
             // 共享元素
             shareEl = _$getShareNowElement(el);
             this._$updateShareViewCall();
@@ -149,30 +154,62 @@ let shareElement = {
       let shareKey = el.getAttribute("share-key");
       // 处理保存样式
       Vue.$shareElementObj = { [shareKey]: el };
+      /**
+       * 兼容vue3.0
+       * 获取getBoundingClientRect有延迟，需要离开界面时就保存对应值
+       */
+      Vue.$shareElementConfig = { [shareKey]: Object.assign(el.getBoundingClientRect(), { offsetWidth: el.offsetWidth, offsetHeight: el.offsetHeight }) };
     }
 
     function _$getShareNowElement(el) {
       if (!el) return;
       let shareKey = el.getAttribute("share-key");
       let shareEl = Vue.$shareElementObj && Vue.$shareElementObj[shareKey];
+      shareElConfig = Vue.$shareElementConfig && Vue.$shareElementConfig[shareKey];
       Vue.$shareElRefIndex = (shareEl && shareEl.getAttribute("ref-index")) || -1;
       return shareEl;
     }
 
+    function _$beforeDestroy($vue) {
+      // 防止多次调用
+      if (!mulClick) {
+        let shareEl = $vue.$refs[_options.shareRefName] instanceof Array ? $vue.$refs[_options.shareRefName][0] : $vue.$refs[_options.shareRefName];
+        if (!shareEl) Vue.$shareElementObj = null;
+        else shareEl.getAttribute("share-key") && _$saveShareNowElement(shareEl);
+        mulClick = new Date().getTime();
+        // 清理事件
+        let $refs = _$getRefs($vue);
+        $refs && $refs[_options.sharesRefName] && $refs[_options.sharesRefName].removeEventListener("scroll", _$saveSharesScroll);
+      }
+    }
+    /**
+     * 如果有父容器，并是多对一模式,重新定位
+     */
     function _$returnSharesPoinit($vue) {
-      // 如果有父容器，并是多对一模式,重新定位
-      if ($vue.$refs[_options.sharesRefName] && Vue.$shareElRefIndex && Vue.$shareElRefIndex !== -1) {
-        $vue.$refs[_options.shareRefName] = $vue.$refs[_options.sharesRefName].children[Vue.$shareElRefIndex];
+      let $refs = _$getRefs($vue);
+      if ($refs[_options.sharesRefName] && Vue.$shareElRefIndex && Vue.$shareElRefIndex !== -1) {
+        $refs[_options.shareRefName] = $refs[_options.sharesRefName].children[Vue.$shareElRefIndex];
         // 滚动定位
-        $vue.$refs[_options.sharesRefName].scrollTop = Vue.$sharesScrollTop;
-        $vue.$refs[_options.sharesRefName].scrollLeft = Vue.$sharesScrollLeft;
+        $refs[_options.sharesRefName].scrollTop = Vue.$sharesScrollTop;
+        $refs[_options.sharesRefName].scrollLeft = Vue.$sharesScrollLeft;
         // 当前界面元素
-        el = $vue.$refs[_options.shareRefName] instanceof Array ? $vue.$refs[_options.shareRefName][0] : $vue.$refs[_options.shareRefName];
+        el = $refs[_options.shareRefName] instanceof Array ? $refs[_options.shareRefName][0] : $refs[_options.shareRefName];
         // 共享元素
         shareEl = _$getShareNowElement(el);
         $vue._$updateShareViewCall();
         Vue.$shareElRefIndex = -1;
       }
+    }
+    function _$saveSharesScroll() {
+      Vue.$sharesScrollTop = this.scrollTop;
+      Vue.$sharesScrollLeft = this.scrollLeft;
+    }
+    function _$getRefs($vue) {
+      /**
+       * 兼容vue3.0
+       *  vue3.0不能直接获取this.$refs，但可以this.$.refs获取
+       */
+      return !$vue.$ ? $vue.$refs : $vue.$.refs;
     }
     // ---- hooks
     function initShareHooks($vue) {
