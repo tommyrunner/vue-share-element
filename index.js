@@ -1,3 +1,4 @@
+import ShareElement from "./share-element.vue";
 let shareElement = {
   /**
    * 入口
@@ -86,7 +87,7 @@ let shareElement = {
     Vue.mixin({
       // router-view 动画
       components: {
-        shareElement: () => import("./share-element.vue"),
+        ShareElement,
       },
       // beforeDestroy 保存共享组件
       beforeDestroy() {

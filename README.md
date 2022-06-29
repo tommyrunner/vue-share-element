@@ -152,18 +152,9 @@ mounted() {
         <component :is="Component" :key="$route.fullPath" />
     </ShareElement>
 </router-view>
-import { defineAsyncComponent } from "vue";
-export default {
-  name: "App",
-  components: {
-    ShareElement: defineAsyncComponent(() => import("./components/share-element.vue")),
-  },
-};
-</script>
 ```
 
 > + vue3.0中router-view 只能内嵌transition方式
-> + 如果项目使用vite创建，使用defineAsyncComponent 异步引入组件
 
 ### 设置共享元素（一对一）(无更改)
 
@@ -210,5 +201,6 @@ export default {
 + **父容器**必须有**高度**，返回界面需要定位。
 + 如果父容器加了Padding有动画闪动，父容器需加上 box-sizing: border-box;
 + 共享元素的tag标签不能是vue的根元素，需要包裹。
++ 兼容中遇到的问题:  https://blog.csdn.net/qq_43536071/article/details/125531727
 + 遗留问题：
   + 如果当前元素处于滚动最低位置，未定位(<u>待解决中</u>)
