@@ -1,4 +1,4 @@
-# vue-share-element
+# vue-share-element（已兼容Vue3.0）
 
 ## 简介
 
@@ -19,11 +19,28 @@ npm install vue-share-element
 ```js
 import shareElement from "vue-share-element";
 Vue.use(shareElement);
-// 自定义参数 Vue.use(shareElement,{ duration: 600, zIndex: 20001 });
+/*
+自定义参数 
+Vue.use(shareElement,
+	{ 
+	duration: 600, 
+	zIndex: 20001,
+	shareRefName: "share",
+	sharesRefName:'shares' 
+	}
+);
+*/ 
 ```
 
 > + duration：过渡动画时间，默认600
 > + zIndex：共享元素层级，默认20001
+> + shareRefName：自定义共享元素ref名，默认share
+> + sharesRefName：自定义共享元素集合ref名，默认shares
+>
+> 注：为什么使用ref去获取元素
+>
+> + 如果开发者设置了多个同一ref值不会影响共享元素的获取与控制
+> + ref 获取的状态与时间暂时是比较吻合当前需求
 
 ## 使用
 
@@ -102,8 +119,88 @@ Vue.use(shareElement);
 > + share-key：**共享元素key**与**当前元素key**一致（必须）
 > + 注意跳转界面前主动将 this.$refs["share"] **动态设置**触发的元素
 
+## hooks生命周期
+
+> 所有的hook都封装在 **$shareHooks** 对象中
+
+```js
+mounted() {
+    this.$shareHooks.beforeStart = () => {
+        console.log("动画开始前");
+    };
+    this.$shareHooks.start = () => {
+        console.log("动画开始后");
+    };
+    this.$shareHooks.beforeEnd = () => {
+        console.log("动画结束前");
+    };
+    this.$shareHooks.end = () => {
+        console.log("动画结束后");
+    };
+},
+```
+
+## 兼容Vue3.0
+
+### 引用(无更改)
+
+### 使用
+
+```vue
+<router-view v-slot="{ Component }">
+    <ShareElement name="start-def">
+        <component :is="Component" :key="$route.fullPath" />
+    </ShareElement>
+</router-view>
+```
+
+> + vue3.0中router-view 只能内嵌transition方式
+
+### 设置共享元素（一对一）(无更改)
+
+### 设置共享元素（多对一）
+
++ 页面1  元素设置 
+
+  ```vue
+  <template>
+    <div @click="toPage" ref="shares">
+      <tag v-for="(item, index) in shareList" :key="index" :ref-index="index" share-key="share-tag"/>
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    data() {
+      return {
+        shareList: [],
+      };
+    },
+    methods: {
+      toPage(e) {
+        let el = e.target;
+        if (el.nodeName.toUpperCase() === "TAG") {
+          this.$.refs["share"] = el;
+    		// $router.push('/page2')
+        }
+      },
+    },
+  };
+  </script>
+  
+  ```
+
+  > + 使用方法与思路**无更改**
+  > + vue3.0中 this.$refs通过**Proxy**代理不能直接存入dom对象，但vue3.0在**this.$**中留了**refs**对象使用依旧。
+
+### hooks生命周期(无更改)
+
 ## 附
 
-+ tag 元素建议设置 宽高，例如img。
++ tag 元素建议设置 **宽高**，例如img。
++ **父容器**必须有**高度**，返回界面需要定位。
 + 如果父容器加了Padding有动画闪动，父容器需加上 box-sizing: border-box;
 + 共享元素的tag标签不能是vue的根元素，需要包裹。
++ 兼容中遇到的问题:  https://blog.csdn.net/qq_43536071/article/details/125531727
++ 遗留问题：
+  + 如果当前元素处于滚动最低位置，未定位(<u>待解决中</u>)
