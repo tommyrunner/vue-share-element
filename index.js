@@ -8,6 +8,8 @@ let shareElement = {
    *  zIndex：共享元素层级
    */
   install: function (Vue, options) {
+    // 全局引用界面动画组件
+    Vue.component('ShareElement',ShareElement)
     // 配置参数 duration：动画时间，zIndex共享元素：层级,shareRefName：自定义共享元素ref名，sharesRefName：自定义共享元素集合ref名
     let _options = Object.assign({ duration: 600, zIndex: 20001, shareRefName: "share", sharesRefName: "shares" }, options);
     // el：当前元素,_shareType:share类型，_hooks:钩子，_$HooksName钩子抛变量，shareEl：共享元素,mulClick：防抖
@@ -37,35 +39,48 @@ let shareElement = {
       // 初始化shareEl
       yield () => {
         callHooks("start");
-        Object.assign(shareEl.style, {
-          position: "fixed",
-          zIndex: _options.zIndex,
-          top: `${shareElRect.top}px`,
-          left: `${shareElRect.left}px`,
-          width: `${(shareElConfig && shareElConfig.offsetWidth) || shareEl.offsetWidth}px`,
-          height: `${(shareElConfig && shareElConfig.offsetHeight) || shareEl.offsetHeight}px`,
-          transition: `${_options.duration / 1000}s`,
-          overflow: "hidden",
-          margin: 0,
-          padding: 0,
-        });
+        // 集中修改防止多次重排
+        shareEl.style.cssText = `
+       position: fixed;
+       zIndex: _options.zIndex;
+       top: ${shareElRect.top}px;
+       left: ${shareElRect.left}px;
+       width: ${(shareElConfig && shareElConfig.offsetWidth) || shareEl.offsetWidth}px;
+       height: ${(shareElConfig && shareElConfig.offsetHeight) || shareEl.offsetHeight}px;
+       transition:${_options.duration / 1000}s;
+       overflow: hidden;
+       margin: 0;
+       padding: 0;
+       `;
         document.body.appendChild(shareEl);
-        // 当前元素不能有过渡效果
-        el.style.transition = "none";
       };
       // 过渡1-隐藏当前元素
       yield () => {
+        // 当前元素不能有过渡效果
+        el.style.transition = "none";
         el.style.opacity = "0";
       };
       // 过渡2-异步移动共享元素
       yield new Promise((res) => {
         setTimeout(() => {
-          Object.assign(shareEl.style, {
-            top: `${el.offsetTop - ((_shareType === _options.sharesRefName && Vue.$sharesScrollTop) || 0)}px`,
-            left: `${el.offsetLeft - ((_shareType === _options.sharesRefName && Vue.$sharesScrollLeft) || 0)}px`,
-            width: `${el.offsetWidth}px`,
-            height: `${el.offsetHeight}px`,
+          // 替换新的改变值
+          let cssTexts = shareEl.style.cssText.split(";");
+          cssTexts = cssTexts.map((c) => {
+            if (c.indexOf("top:") > -1) {
+              return `top: ${el.offsetTop - ((_shareType === _options.sharesRefName && Vue.$sharesScrollTop) || 0)}px`;
+            }
+            if (c.indexOf("left:") > -1) {
+              return `left:${el.offsetLeft - ((_shareType === _options.sharesRefName && Vue.$sharesScrollLeft) || 0)}px`;
+            }
+            if (c.indexOf("width:") > -1) {
+              return `width:${el.offsetWidth}px`;
+            }
+            if (c.indexOf("height:") > -1) {
+              return `height:${el.offsetHeight}px`;
+            }
+            return c;
           });
+          shareEl.style.cssText = cssTexts.join(";");
           res();
         }, 1);
         callHooks("beforeEnd");
@@ -85,10 +100,6 @@ let shareElement = {
       });
     }
     Vue.mixin({
-      // router-view 动画
-      components: {
-        ShareElement,
-      },
       // beforeDestroy 保存共享组件
       beforeDestroy() {
         _$beforeDestroy(this);
