@@ -98,6 +98,7 @@ Vue.use(shareElement,
           methods: {
               // 事件代理 将点击的element 动态设置share
               toPage(e) {
+                  let el = e.target;
                   if (el.nodeName.toUpperCase() === "TAG") {
                       this.$refs["share"] = e.target;
                       // $router.push('/page2')
@@ -204,3 +205,6 @@ mounted() {
 + 兼容中遇到的问题:  https://blog.csdn.net/qq_43536071/article/details/125531727
 + 遗留问题：
   + 如果当前元素处于滚动最低位置，未定位(<u>待解决中</u>)
+
+
+> 注：经测试暂不主持多组件嵌套情况(待维护)
