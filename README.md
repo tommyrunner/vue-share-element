@@ -4,7 +4,7 @@
 
 + 实例
 
-![VueShareElement](C:\Users\w\Desktop\VueShareElement.png)
+![VueShareElement](https://img-blog.csdnimg.cn/3bb91d955db34bfcbbd25fddd6c26dd2.png#pic_center)
 
 + 效果
 
