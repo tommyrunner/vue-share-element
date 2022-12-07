@@ -154,6 +154,17 @@ npm install vue-share-element
 >
 > 1. 接收界面是**异步渲染**的情况下，需要提前定型(**提前设置好元素宽高**)
 > 2. 注意 **share** 是唯一的，相当于v-key，进行**记录触发共享元素key**
+> 3. *如果在数据多出现**滚动条情况下**,滚动条一定在父容器上，如果是**body**或**更上级挤出来的滚动条**，位置会计算问题 (**解决**:限制**VueShareElementVue**的宽高，让滚动条在**VueShareElementVue**上，**VueShareElementVue**会**自动计算位置**)。
+>
+> ```css
+> {
+>     width: 100px;
+>     height: 300px;
+>     overflow: auto;
+> }
+> ```
+>
+> 
 
 ## props属性
 
