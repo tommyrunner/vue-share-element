@@ -4,7 +4,7 @@
 
 + 实例
 
-![VueShareElement](https://img-blog.csdnimg.cn/3bb91d955db34bfcbbd25fddd6c26dd2.png#pic_center)
+![VueShareElement](https://img-blog.csdnimg.cn/4cb09f56aec64fe78212b6aab07115aa.png#pic_center)
 
 + 效果
 
