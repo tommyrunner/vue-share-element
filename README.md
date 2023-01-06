@@ -173,7 +173,7 @@ npm install vue-share-element
 
 ## emit函数
 
-+ setHooks(Function):添加生命周期
++ setHooks(end:Function):添加生命周期
 
 ## 附
 
