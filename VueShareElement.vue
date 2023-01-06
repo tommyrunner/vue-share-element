@@ -4,12 +4,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-/**
- * 流程:
- * 1.A界面标记离开并全局生成共享dom，
- * 2.进入B界面判断是否处于共享状态，
- * 3.设置更新dom位置,清除共享dom，更新完成并标记共享状态结束（本界面就成A界面）
- */
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { setElementStyle } from "./uitls";
 import type { WindowType, AttributesType, HooksType } from "./types.d";
