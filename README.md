@@ -8,7 +8,7 @@
 
 + 效果
 
-![csdn](https://img-blog.csdnimg.cn/4f3944b991ea457aa95e487a7d90230a.gif#pic_center)
+![csdn](https://img-blog.csdnimg.cn/b4511a4ef7ac44ea9677f929963047a1.gif)
 
 > + vue-share-element基于vue的单界面路由**动画跳转**插件。
 >
