@@ -26,12 +26,12 @@ npm install vue-share-element
 
   ```vue
   <template>
-    <VueShareElementVue>
+    <VueShareElement>
       <button @click="$router.push('/user')">pageA</button>
-    </VueShareElementVue>
+    </VueShareElement>
   </template>
   <script lang="ts" setup>
-  import VueShareElementVue from "vue-share-element/VueShareElement.vue";
+  import VueShareElement from "vue-share-element";
   </script>
   ```
 
@@ -39,12 +39,12 @@ npm install vue-share-element
 
   ```vue
   <template>
-    <VueShareElementVue>
+    <VueShareElement>
       <button @click="$router.go(-1)">pageB</button>
-    </VueShareElementVue>
+    </VueShareElement>
   </template>
   <script lang="ts" setup>
-  import VueShareElementVue from "vue-share-element/VueShareElement.vue";
+  import VueShareElement from "vue-share-element";
   </script>
   <style scoped>
   /* 为了显示动画效果 */
@@ -67,14 +67,14 @@ npm install vue-share-element
 
   ```vue
   <template>
-  <VueShareElementVue @click="toPage" class="list" ref="shareElementRef">
+  <VueShareElement @click="toPage" class="list" ref="shareElementRef">
       <img v-for="item in list" :key="item" :share="item" :data-src="item" :src="item" />
-      </VueShareElementVue>
+  </VueShareElement>
   </template>
   <script lang="ts" setup>
       import { onMounted, ref } from "vue";
       import { useRouter } from "vue-router";
-      import VueShareElementVue from "vue-share-element/VueShareElement.vue";
+      import VueShareElement from "vue-share-element";
       const router = useRouter();
       const shareElementRef = ref<InstanceType<typeof VueShareElementVue>>();
       const list = [
@@ -95,7 +95,7 @@ npm install vue-share-element
       	通过 子元素 data- 传递数据
       */
       function toPage(params: DOMStringMap) {
-            if (params.src) 
+          if (params.src) 
               router.push({ path: "/pageB", query: { img: encodeURIComponent(params.src) } });
       }
   </script>
@@ -118,16 +118,16 @@ npm install vue-share-element
   ```vue
   <template>
     <div class="page-b">
-      <VueShareElementVue>
+      <VueShareElement>
         <img :src="src" @click="$router.go(-1)" />
-      </VueShareElementVue>
+      </VueShareElement>
       <span>图片信息</span>
     </div>
   </template>
   <script lang="ts" setup>
   import { onMounted, ref } from "vue";
   import { useRoute } from "vue-router";
-  import VueShareElementVue from "vue-share-element/VueShareElement.vue";
+  import VueShareElement from "vue-share-element";
   let src = ref("");
   const route = useRoute();
   onMounted(() => {

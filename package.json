@@ -1,8 +1,9 @@
 {
   "name": "vue-share-element",
-  "version": "3.0.7",
+  "version": "3.1.1",
   "description": "vue share element",
-  "types": "types.d.ts",
+  "types": "./VueShareElement.vue",
+  "main": "./VueShareElement.vue",
   "scripts": {
     "push": "npm publish"
   },

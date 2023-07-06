@@ -25,6 +25,7 @@ let _$hooks: HooksType = {
   onEnd: () => {},
   onStart: () => {},
 };
+const CLONE_ID = "_$shareElement";
 onBeforeUnmount(() => {
   let els = elPraRef.value.children;
   if (els && els.length > 0) {
@@ -34,7 +35,7 @@ onBeforeUnmount(() => {
     // Get element screen information
     let boundingData = el.getBoundingClientRect();
     // mark as shareing state(set share element id)
-    cloneElement.id = "_$shareElement";
+    cloneElement.id = CLONE_ID;
     // initialize share element styles
     setElementStyle(cloneElement, {
       position: "fixed",
@@ -52,13 +53,23 @@ onBeforeUnmount(() => {
       $window._$scrollTop = elPraRef.value.scrollTop;
       $window._$scrollLeft = elPraRef.value.scrollLeft;
     }
-    // add on the body
-    document.body.append(cloneElement);
+    // Record the elements that need to be shared first
+    $window._$clone = cloneElement;
   }
 });
 onMounted(() => {
+  // Mark clone elements to prevent duplicate animations on the current page
+  if ($window._$flag === $window.location.href) {
+    return;
+  }
+  $window._$flag = $window.location.href;
+  // Created only when there is a real shareElement element present
+  const cloneElement = $window._$clone;
+  if (cloneElement) {
+    document.body.append(cloneElement);
+  }
   // judge the current state(get shre element id)
-  let _$shareDoc = document.getElementById("_$shareElement");
+  let _$shareDoc = document.getElementById(CLONE_ID);
   if (_$shareDoc) {
     // shareing and get children element
     let els: Array<HTMLElement> = Array.from(elPraRef.value.children);
@@ -97,7 +108,7 @@ onMounted(() => {
           setElementStyle(el, {
             opacity: 1,
           });
-          _$shareDoc?.remove();
+          _$shareDoc.remove();
         }
         // call hook share end
         _$hooks.onEnd && _$hooks.onEnd();
@@ -105,6 +116,7 @@ onMounted(() => {
       }, props.delay * 1000);
     }
   } else {
+    // Delete elements that have already been created
     console.warn("VueShareElement:Receiver not found!");
   }
 });
