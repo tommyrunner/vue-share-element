@@ -32,7 +32,7 @@ npm install vue-share-element
   ```vue
   <template>
     <VueShareElement>
-      <button @click="$router.push('/user')">pageA</button>
+      <button @click="$router.push('/home2')">pageA</button>
     </VueShareElement>
   </template>
   <script lang="ts" setup>
