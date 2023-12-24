@@ -1,7 +1,7 @@
 {
   "name": "vue-share-element",
-  "version": "3.1.4",
-  "description": "vue share element",
+  "version": "3.2.0",
+  "description": "Implementation of shared element interface adjustment animation based on Vue3",
   "types": "./VueShareElement.vue",
   "main": "./VueShareElement.vue",
   "scripts": {
@@ -11,6 +11,12 @@
     "type": "git",
     "url": "https://github.com/tommyrunner/vue-share-element.git"
   },
+  "keywords": [
+    "Vue3",
+    "router",
+    "share-element",
+    "animation"
+  ],
   "author": "",
   "license": "ISC"
 }

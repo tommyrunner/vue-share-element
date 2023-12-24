@@ -12,13 +12,16 @@ interface PropsType {
   delay?: number;
   zIndex?: number;
 }
+interface EmitType {
+  (event: "toPage", el: HTMLElement): void;
+}
 const elPraRef = ref();
 let $window: WindowType = window;
 const props = withDefaults(defineProps<PropsType>(), {
   delay: 0.62,
   zIndex: 2001,
 });
-const $emit = defineEmits(["click"]);
+const $emit = defineEmits<EmitType>();
 let $shareElement: HTMLElement | null = null;
 // hooks
 let _$hooks: HooksType = {
@@ -90,6 +93,7 @@ onMounted(() => {
         opacity: 0,
       });
       //   perform share actions
+      console.log($window._$scrollLeft, boundingData.left, els.length);
       setElementStyle(_$shareDoc, {
         opacity: 1,
         top: `${els.length > 1 && $window._$scrollTop ? boundingData.top - $window._$scrollTop : boundingData.top}px`,
@@ -99,6 +103,14 @@ onMounted(() => {
       });
       // Set to return recorded scroll
       elPraRef.value.scrollTop = $window._$scrollTop;
+      // Asynchronous handling of rolling over issues
+      setTimeout(() => {
+        elPraRef.value.scrollBy({
+          top: $window._$scrollTop,
+          left: $window._$scrollLeft,
+          behavior: "smooth",
+        });
+      });
       //  clear
       let domTimeId = setTimeout(() => {
         if (_$shareDoc) {
@@ -125,13 +137,21 @@ function getShareElement(e: MouseEvent) {
   if (el) {
     $shareElement = el;
     // In the case of many to one: record the element triggered last time
-    let attributes: AttributesType = el.attributes;
+    let elPra: HTMLElement | null | ParentNode = el;
+    while (elPra !== null && elPra.parentNode !== elPraRef.value) {
+      elPra = elPra.parentNode;
+    }
+    /**
+     * Obtain the share attribute in the top-level sub element by clicking on the element
+     * (Solve the problem that nested subcomponents can not get share attributes)
+     */
+    let attributes: AttributesType = (elPra as HTMLElement).attributes;
     if (!$window._$share && attributes && attributes.share) {
       $window._$share = attributes.share.value;
     }
   }
   // Because the click event is proxied, the parameter needs to be thrown
-  $emit("click", Object.assign(el.dataset) || {});
+  $emit("toPage", el);
 }
 /**
  * life cycle

@@ -1,5 +1,10 @@
 # vue-share-element（已兼容Vue3 + ts）
 
+## 更新
+
++ 优化父容器滚动情况
++ 优化vue组件嵌套问题
+
 ## 简介
 
 + 实例
@@ -8,7 +13,7 @@
 
 + 效果
 
-![csdn](https://img-blog.csdnimg.cn/b4511a4ef7ac44ea9677f929963047a1.gif)
+![csdn](https://img-blog.csdnimg.cn/direct/28784f4abf4749e3b8060bcc96a7822e.gif)
 
 > + vue-share-element基于vue的单界面路由**动画跳转**插件。
 >
@@ -67,84 +72,70 @@ npm install vue-share-element
 
   ```vue
   <template>
-  <VueShareElement @click="toPage" class="list" ref="shareElementRef">
-      <img v-for="item in list" :key="item" :share="item" :data-src="item" :src="item" />
-  </VueShareElement>
+    <VueShareElement class="list" ref="shareElementRef" @toPage="onToPage">
+      <div v-for="item in 10" :key="item" :share="item" class="box">
+        {{ item }}
+      </div>
+    </VueShareElement>
   </template>
   <script lang="ts" setup>
-      import { onMounted, ref } from "vue";
-      import { useRouter } from "vue-router";
-      import VueShareElement from "vue-share-element";
-      const router = useRouter();
-      const shareElementRef = ref<InstanceType<typeof VueShareElementVue>>();
-      const list = [
-          "https:xxxx",
-          "https:xxxx",
-          "https:xxxx",
-          "https:xxxx",
-          "https:xxxx",
-      ];
-      onMounted(() => {
-          // 动画结束钩子
-          shareElementRef.value?.setHooks(() => {
-              console.log("结束");
-          });
-      });
-      /*
-      	为了更好记录共享元素，多对一情况下需要父容器代理事件
-      	通过 子元素 data- 传递数据
-      */
-      function toPage(params: DOMStringMap) {
-          if (params.src) 
-              router.push({ path: "/pageB", query: { img: encodeURIComponent(params.src) } });
-      }
+  import { useRouter } from "vue-router";
+  import VueShareElement from "vue-share-element";
+  const router = useRouter();
+  function onToPage(el: HTMLElement) {
+    console.log(el);
+    router.push({ path: "/home2" });
+  }
   </script>
   <style scoped>
-      .list {
-          display: flex;
-      }
-      .list img {
-          width: 100px;
-          height: 50px;
-          margin: 12px;
-          cursor: pointer;
-      }
+  .list {
+    display: flex;
+    width: 800px;
+    height: 200px;
+    overflow: auto;
+    margin: 24px;
+  }
+  .box {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    box-shadow: 1px 1px 5px rgba(128, 128, 128, 0.614);
+    margin: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   </style>
-  
   ```
 
 + B页面 (pageB)
 
   ```vue
   <template>
-    <div class="page-b">
-      <VueShareElement>
-        <img :src="src" @click="$router.go(-1)" />
-      </VueShareElement>
-      <span>图片信息</span>
-    </div>
+    <VueShareElement>
+      <div class="box" @click="$router.go(-1)">返回</div>
+    </VueShareElement>
   </template>
   <script lang="ts" setup>
-  import { onMounted, ref } from "vue";
-  import { useRoute } from "vue-router";
   import VueShareElement from "vue-share-element";
-  let src = ref("");
-  const route = useRoute();
-  onMounted(() => {
-    let url = route.query.img as string;
-    src.value = decodeURIComponent(url);
-  });
   </script>
   <style scoped>
-  .page-b {
-    position: absolute;
-    left: 50%;
+  .box {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     top: 50%;
-    transform: translate(-50%, -50%);
-  }
-  .page-b img {
-    width: 300px;
-    height: 200px;
+    left: 50%;
+    border-radius: 12px;
+    box-shadow: 1px 1px 5px rgba(128, 128, 128, 0.614);
+    margin: 10px;
+    cursor: pointer;
   }
   </style>
   
@@ -164,12 +155,16 @@ npm install vue-share-element
 > }
 > ```
 >
-> 
+> 4. 同一个界面中不能出现**多个共享元素组件**。
+> 5. 暂时共享元素与目标元素只有**位置与宽高的过度**，其他动画还需开发。
 
 ## props属性
 
 + delay：设置动画延迟时间(默认:0.62秒)
 + zIndex: 设置动画层级(默认:2001)
++ 子元素属性:
+  + share: 唯一标识
+
 
 ## emit函数
 
