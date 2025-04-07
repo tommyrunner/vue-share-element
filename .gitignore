@@ -1,0 +1,34 @@
+# 依赖目录
+node_modules/
+
+# 编辑器目录和文件
+.vscode/
+.idea/
+.DS_Store
+
+# 日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 本地环境文件
+.env.local
+.env.*.local
+
+# 临时文件
+.tmp/
+.temp/
+
+# 构建文件
+/dist
+
+# 测试覆盖率报告
+coverage/
+
+# 开发文件
+demo.vue
+app.js
+index.html
+vite.config.js
+

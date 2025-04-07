@@ -5,8 +5,8 @@
 </template>
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref } from "vue";
-import { setElementStyle } from "./uitls";
-import type { WindowType, AttributesType, HooksType } from "./types.d";
+import { setElementStyle } from "../utils";
+import type { WindowType, AttributesType, HooksType } from "../types";
 // Action Element
 interface PropsType {
   delay?: number;

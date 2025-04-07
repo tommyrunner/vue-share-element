@@ -7,7 +7,7 @@ export interface AttributesType extends NamedNodeMap {
 export interface WindowType extends Window {
   _$flag?: any;
   _$share?: any;
-  _$clone?: HtmlElement;
+  _$clone?: HTMLElement;
   _$scrollTop?: number;
   _$scrollLeft?: number;
 }
