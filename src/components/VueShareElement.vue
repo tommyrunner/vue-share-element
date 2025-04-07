@@ -7,14 +7,22 @@
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { setElementStyle } from "../utils";
 import type { WindowType, AttributesType, HooksType } from "../types";
-// Action Element
+
+/**
+ * 组件属性类型
+ */
 interface PropsType {
-  delay?: number;
-  zIndex?: number;
+  delay?: number; // 动画延迟时间
+  zIndex?: number; // 动画元素层级
 }
+
+/**
+ * 事件类型
+ */
 interface EmitType {
   (event: "toPage", el: HTMLElement): void;
 }
+
 const elPraRef = ref();
 let $window: WindowType = window;
 const props = withDefaults(defineProps<PropsType>(), {
@@ -23,23 +31,29 @@ const props = withDefaults(defineProps<PropsType>(), {
 });
 const $emit = defineEmits<EmitType>();
 let $shareElement: HTMLElement | null = null;
-// hooks
+
+/**
+ * 钩子函数
+ */
 let _$hooks: HooksType = {
   onEnd: () => {},
   onStart: () => {},
 };
+
+// 克隆元素ID
 const CLONE_ID = "_$shareElement";
+
 onBeforeUnmount(() => {
   let els = elPraRef.value.children;
   if (els && els.length > 0) {
-    // By default,first element is selected the shared element and deeply cloned
+    // 默认选择第一个元素作为共享元素，或使用已选中的元素
     let el = $shareElement || els[0];
     let cloneElement: HTMLElement = el.cloneNode(true);
-    // Get element screen information
+    // 获取元素屏幕信息
     let boundingData = el.getBoundingClientRect();
-    // mark as shareing state(set share element id)
+    // 标记为共享状态（设置共享元素ID）
     cloneElement.id = CLONE_ID;
-    // initialize share element styles
+    // 初始化共享元素样式
     setElementStyle(cloneElement, {
       position: "fixed",
       overflow: "hidden",
@@ -51,40 +65,40 @@ onBeforeUnmount(() => {
       height: `${boundingData.height}px`,
       transition: `${props.delay}s`,
     });
-    // When then number is greater than 1 record parent container scroll
+    // 当子元素数量大于1时，记录父容器滚动状态
     if (els.length > 1) {
       $window._$scrollTop = elPraRef.value.scrollTop;
       $window._$scrollLeft = elPraRef.value.scrollLeft;
     }
-    // Record the elements that need to be shared first
+    // 记录需要共享的元素
     $window._$clone = cloneElement;
   }
 });
 onMounted(() => {
-  // Mark clone elements to prevent duplicate animations on the current page
+  // 标记克隆元素以防止当前页面上的重复动画
   if ($window._$flag === $window.location.href) {
     return;
   }
   $window._$flag = $window.location.href;
-  // Created only when there is a real shareElement element present
+  // 仅在存在实际的shareElement元素时创建
   const cloneElement = $window._$clone;
   if (cloneElement) {
     document.body.append(cloneElement);
   }
-  // judge the current state(get shre element id)
+  // 判断当前状态（获取共享元素ID）
   let _$shareDoc = document.getElementById(CLONE_ID);
   if (_$shareDoc) {
-    // shareing and get children element
+    // 共享并获取子元素
     let els: Array<HTMLElement> = Array.from(elPraRef.value.children);
     if (els && els.length > 0) {
-      // Judge the many to one situation: find the share record dom
+      // 判断多对一的情况：查找共享记录的DOM
       if (els.length > 1) {
         let findShareElement = els.find((e: HTMLElement) => {
           let attributes: AttributesType = e.attributes;
           return $window._$share && attributes.share && attributes.share.value === $window._$share;
         });
         if (findShareElement) $shareElement = findShareElement;
-        // Clear the last record after searching the record
+        // 搜索记录后清除上次的记录
         $window._$share = undefined;
       }
       let el: HTMLElement = $shareElement || els[0];
@@ -92,7 +106,7 @@ onMounted(() => {
       setElementStyle(el, {
         opacity: 0,
       });
-      //   perform share actions
+      // 执行共享操作
       console.log($window._$scrollLeft, boundingData.left, els.length);
       setElementStyle(_$shareDoc, {
         opacity: 1,
@@ -101,9 +115,9 @@ onMounted(() => {
         width: `${boundingData.width}px`,
         height: `${boundingData.height}px`,
       });
-      // Set to return recorded scroll
+      // 设置返回记录的滚动位置
       elPraRef.value.scrollTop = $window._$scrollTop;
-      // Asynchronous handling of rolling over issues
+      // 异步处理滚动问题
       setTimeout(() => {
         elPraRef.value.scrollBy({
           top: $window._$scrollTop,
@@ -111,7 +125,7 @@ onMounted(() => {
           behavior: "smooth",
         });
       });
-      //  clear
+      // 清理
       let domTimeId = setTimeout(() => {
         if (_$shareDoc) {
           setElementStyle(_$shareDoc, {
@@ -122,45 +136,45 @@ onMounted(() => {
           });
           _$shareDoc.remove();
         }
-        // call hook share end
+        // 调用钩子：共享结束
         _$hooks.onEnd && _$hooks.onEnd();
         clearTimeout(domTimeId);
       }, props.delay * 1000);
     }
   } else {
-    // Delete elements that have already been created
-    console.warn("VueShareElement:Receiver not found!");
+    // 删除已创建的元素
+    console.warn("VueShareElement:接收器未找到！");
   }
 });
 function getShareElement(e: MouseEvent) {
   let el = e.target as HTMLElement;
   if (el) {
     $shareElement = el;
-    // In the case of many to one: record the element triggered last time
+    // 多对一的情况：记录上次触发的元素
     let elPra: HTMLElement | null | ParentNode = el;
     while (elPra !== null && elPra.parentNode !== elPraRef.value) {
       elPra = elPra.parentNode;
     }
     /**
-     * Obtain the share attribute in the top-level sub element by clicking on the element
-     * (Solve the problem that nested subcomponents can not get share attributes)
+     * 通过点击元素获取顶层子元素中的share属性
+     * （解决嵌套子组件无法获取share属性的问题）
      */
     let attributes: AttributesType = (elPra as HTMLElement).attributes;
     if (!$window._$share && attributes && attributes.share) {
       $window._$share = attributes.share.value;
     }
   }
-  // Because the click event is proxied, the parameter needs to be thrown
+  // 由于点击事件被代理，需要抛出参数
   $emit("toPage", el);
 }
 /**
- * life cycle
- * @param end Called after sharing animation ends
+ * 生命周期
+ * @param end 共享动画结束后调用
  */
 function setHooks(end: Function) {
   _$hooks.onEnd = end;
 }
-// Throw hooks
+// 暴露钩子
 defineExpose({
   setHooks,
 });

@@ -11,9 +11,9 @@ type ElementStyle = {
   transition?: string;
 };
 /**
- * Set style in batch
- * @param element
- * @param style
+ * 批量设置样式
+ * @param element 目标元素
+ * @param style 样式对象
  */
 export function setElementStyle(element: HTMLElement | null, style: ElementStyle) {
   let temStyle: { [key in string]: string | number } = {};
