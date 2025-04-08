@@ -6,22 +6,7 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { setElementStyle } from "../utils";
-import type { WindowType, AttributesType, HooksType } from "../types";
-
-/**
- * 组件属性类型
- */
-interface PropsType {
-  delay?: number; // 动画延迟时间
-  zIndex?: number; // 动画元素层级
-}
-
-/**
- * 事件类型
- */
-interface EmitType {
-  (event: "toPage", el: HTMLElement): void;
-}
+import type { WindowType, AttributesType, HooksType, EmitType, PropsType } from "../types";
 
 const elPraRef = ref();
 let $window: WindowType = window;
