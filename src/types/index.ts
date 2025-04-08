@@ -19,6 +19,8 @@ export interface WindowType extends Window {
   _$clone?: HTMLElement; // 克隆的共享元素
   _$scrollTop?: number; // 滚动容器的垂直滚动位置
   _$scrollLeft?: number; // 滚动容器的水平滚动位置
+  _$computedStyle?: Record<string, string>; // 完整的计算样式信息
+  _$sourceHTML?: string; // 源元素的HTML内容
 }
 
 /**

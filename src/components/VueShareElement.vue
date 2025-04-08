@@ -3,12 +3,12 @@
     <slot></slot>
   </div>
 </template>
-<script lang="ts" setup>
+<script lang="ts" setup name="VueShareElement">
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { setElementStyle } from "../utils";
 import type { WindowType, AttributesType, HooksType, EmitType, PropsType } from "../types";
 
-const elPraRef = ref();
+const elPraRef = ref<HTMLDivElement>();
 let $window: WindowType = window;
 const props = withDefaults(defineProps<PropsType>(), {
   delay: 0.62,
@@ -29,11 +29,11 @@ let _$hooks: HooksType = {
 const CLONE_ID = "_$shareElement";
 
 onBeforeUnmount(() => {
-  let els = elPraRef.value.children;
+  let els = elPraRef.value?.children;
   if (els && els.length > 0) {
     // 默认选择第一个元素作为共享元素，或使用已选中的元素
     let el = $shareElement || els[0];
-    let cloneElement: HTMLElement = el.cloneNode(true);
+    let cloneElement: HTMLElement = el.cloneNode(true) as HTMLElement;
     // 获取元素屏幕信息
     let boundingData = el.getBoundingClientRect();
     // 标记为共享状态（设置共享元素ID）
@@ -52,8 +52,8 @@ onBeforeUnmount(() => {
     });
     // 当子元素数量大于1时，记录父容器滚动状态
     if (els.length > 1) {
-      $window._$scrollTop = elPraRef.value.scrollTop;
-      $window._$scrollLeft = elPraRef.value.scrollLeft;
+      $window._$scrollTop = elPraRef.value?.scrollTop;
+      $window._$scrollLeft = elPraRef.value?.scrollLeft;
     }
     // 记录需要共享的元素
     $window._$clone = cloneElement;
@@ -74,7 +74,7 @@ onMounted(() => {
   let _$shareDoc = document.getElementById(CLONE_ID);
   if (_$shareDoc) {
     // 共享并获取子元素
-    let els: Array<HTMLElement> = Array.from(elPraRef.value.children);
+    let els = [...(elPraRef.value?.children || [])] as HTMLElement[];
     if (els && els.length > 0) {
       // 判断多对一的情况：查找共享记录的DOM
       if (els.length > 1) {
@@ -86,7 +86,7 @@ onMounted(() => {
         // 搜索记录后清除上次的记录
         $window._$share = undefined;
       }
-      let el: HTMLElement = $shareElement || els[0];
+      let el = $shareElement || els[0];
       let boundingData = el.getBoundingClientRect();
       setElementStyle(el, {
         opacity: 0,
@@ -101,15 +101,19 @@ onMounted(() => {
         height: `${boundingData.height}px`,
       });
       // 设置返回记录的滚动位置
-      elPraRef.value.scrollTop = $window._$scrollTop;
-      // 异步处理滚动问题
-      setTimeout(() => {
-        elPraRef.value.scrollBy({
-          top: $window._$scrollTop,
-          left: $window._$scrollLeft,
-          behavior: "smooth",
+      if (elPraRef.value) {
+        elPraRef.value.scrollTop = $window._$scrollTop || 0;
+        // 异步处理滚动问题
+        setTimeout(() => {
+          if (elPraRef.value) {
+            elPraRef.value.scrollBy({
+              top: $window._$scrollTop || 0,
+              left: $window._$scrollLeft || 0,
+              behavior: "smooth",
+            });
+          }
         });
-      });
+      }
       // 清理
       let domTimeId = setTimeout(() => {
         if (_$shareDoc) {

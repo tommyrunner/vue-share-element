@@ -1,16 +1,16 @@
 <template>
   <div class="detail-container">
-    <VueShareElement ref="shareElementRef">
-      <div class="detail-card">
+    <div class="detail-card">
+      <VueShareElement ref="shareElementRef">
         <h2>{{ currentItem ? currentItem.title : "加载中..." }}</h2>
-        <p>{{ currentItem ? currentItem.description : "" }}</p>
-        <div class="item-content">
-          <p>这是详情页的内容，展示从列表页共享元素动画过渡的效果。</p>
-          <p>您可以添加更多内容在这里。</p>
-        </div>
-        <button class="btn" @click="goBack">返回列表</button>
+      </VueShareElement>
+      <p>{{ currentItem ? currentItem.description : "" }}</p>
+      <div class="item-content">
+        <p>这是详情页的内容，展示从列表页共享元素动画过渡的效果。</p>
+        <p>您可以添加更多内容在这里。</p>
       </div>
-    </VueShareElement>
+      <button class="btn" @click="goBack">返回列表</button>
+    </div>
   </div>
 </template>
 
@@ -31,28 +31,11 @@ const router = useRouter();
 const shareElementRef = ref<InstanceType<typeof VueShareElement>>();
 
 // 模拟数据
-const items = [
-  {
-    id: 1,
-    title: "项目1",
-    description: "这是项目1的详细信息",
-  },
-  {
-    id: 2,
-    title: "项目2",
-    description: "这是项目2的详细信息",
-  },
-  {
-    id: 3,
-    title: "项目3",
-    description: "这是项目3的详细信息",
-  },
-  {
-    id: 4,
-    title: "项目4",
-    description: "这是项目4的详细信息",
-  },
-];
+const items = Array.from({ length: 20 }, (_, i) => ({
+  id: i + 1,
+  title: `项目${i + 1}`,
+  description: `这是项目${i + 1}的详细信息`,
+}));
 
 // 获取当前项ID
 const currentId = computed(() => Number(route.params.id));
@@ -77,11 +60,10 @@ function goBack() {
 </script>
 
 <style scoped>
-.item-content {
-  margin: 20px 0;
-  text-align: left;
-}
-.btn {
-  margin-top: 16px;
+.detail-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 </style>
